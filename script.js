@@ -1,50 +1,47 @@
-const apiKey = "066836afd81fd9dd956973969e4698db";
-
-const weatherDataEl = document.getElementById("weather-data");
-const cityInpueEl = document.getElementById("city-inpue");
-const formEl = document.querySelector("form");
-const iconEl = document.querySelector(".icon");
-const temperatureEl = document.querySelector(".temperature");
-const DesShapeEl = document.querySelector(".DesShape");
-const feelsLikeEl = document.querySelector(".feelsLike");
-const humidityEl = document.querySelector(".humidity");
-const windSpeedEl = document.querySelector(".windSpeed");
-
-formEl.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const cityValue = cityInpueEl.value;
-  getWeatherData(cityValue);
-});
-
-async function getWeatherData(cityValue) {
-  try {
-    const responce = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${cityValue}&appid=${apiKey}&units=metric`
-    );
-    if (!responce.ok) {
-      throw new error("network response was not ok");
+let id = '9505fd1df737e20152fbd78cdb289b6a';
+let url = 'https://api.openweathermap.org/data/2.5/weather?units=metric&appid=' + id;
+let city = document.querySelector('.name');
+let form = document.querySelector("form");
+let temperature = document.querySelector('.temperature');
+let description = document.querySelector('.description');
+let valueSearch = document.getElementById('name');
+let clouds = document.getElementById('clouds');
+let humidity = document.getElementById('humidity');
+let pressure = document.getElementById('pressure');
+let main = document.querySelector('main');
+form.addEventListener("submit", (e) => {
+    e.preventDefault();  
+    if(valueSearch.value != ''){
+        searchWeather();
     }
+});
+const searchWeather = () => {
+    fetch(url+'&q='+ valueSearch.value)
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if(data.cod == 200){
+                city.querySelector('figcaption').innerHTML = data.name;
+                city.querySelector('img').src = `https://flagsapi.com/${data.sys.country}/shiny/32.png`;
+                temperature.querySelector('img').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`;
+                temperature.querySelector('span').innerText = data.main.temp;
+                description.innerText = data.weather[0].description;
 
-    const data = await responce.json();
-    const temperatury = Math.round(data.main.temp);
-
-    const description = data.weather[0].description;
-    const icon = data.weather[0].icon;
-    const main = data.weather[0].main;
-
-    const FeelsLike = Math.round(data.main.feels_like);
-    const Humidity = data.main.humidity;
-    const WindSpeed = data.wind.speed;
-
-    iconEl.innerHTML = `<img src="http://openweathermap.org/img/wn/${icon}.png">`;
-    temperatureEl.textContent = `${cityValue} - ${temperatury}°C`;
-    DesShapeEl.textContent = `${main}`;
-    feelsLikeEl.innerHTML = `Feels Like: <br><br> ${FeelsLike}`
-    humidityEl.innerHTML = `humidity: <br><br> ${Humidity}`
-    windSpeedEl.innerHTML = `humidity: <br><br> ${WindSpeed}`
-
-    console.log(data);
-  } catch (error) {
-    alert("please enter the city");
-  }
+                clouds.innerText = data.clouds.all;
+                humidity.innerText = data.main.humidity;
+                pressure.innerText = data.main.pressure;
+            }else{
+                main.classList.add('error');
+                setTimeout(() => {
+                    main.classList.remove('error');
+                }, 1000);
+            }
+            valueSearch.value = '';
+        })
 }
+// search Default
+const initApp = () => {
+    valueSearch.value = 'Dhaka';
+    searchWeather();
+}
+initApp();
